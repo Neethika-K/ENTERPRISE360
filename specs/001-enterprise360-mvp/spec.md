@@ -48,6 +48,9 @@ headline numbers change accordingly.
 4. **Given** any advanced day, **When** the visitor reads the activity feed,
    **Then** the events are presented in the order they occurred and each is stated
    in plain business language.
+5. **Given** a running company, **When** the visitor uses fast-forward,
+   **Then** several days are advanced in sequence and the dashboards and activity
+   feed reflect the cumulative result of those days.
 
 ### User Story 2 - Read the connected dashboards (Priority: P1)
 
@@ -139,12 +142,19 @@ day's events match the first run's first day.
 - **No activity yet**: on a company that has not been advanced, dashboards and the
   activity feed present an empty but valid state rather than an error.
 
+## Clarifications
+
+### Session 2026-07-24
+
+- Q: Should a visitor be able to advance multiple days at once (fast-forward), or only one day per click? → A: Both — keep single "Advance Day" and add a "Fast-forward" that advances several days at once (e.g. +7).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: The system MUST let a visitor advance the simulated company forward
-  by one day on demand, with time advancing only in response to that action.
+  in time on demand — either one day at a time or by a fixed multi-day jump
+  (fast-forward) — with time advancing only in response to that action.
 - **FR-002**: On each advance, the system MUST generate new customer demand for a
   defined set of products and record the resulting orders.
 - **FR-003**: The system MUST fulfil an order line when available stock covers it
