@@ -30,7 +30,15 @@ export default function TrendChart({
             labelStyle={{ color: '#8a98b0' }}
             itemStyle={{ color: '#e8edf5' }}
           />
-          <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 3 }}
+            isAnimationActive={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
