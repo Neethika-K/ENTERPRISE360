@@ -20,11 +20,24 @@ async function main() {
     prisma.simState.deleteMany(),
   ]);
 
-  const suppliers = await Promise.all([
-    prisma.supplier.create({ data: { name: 'Nimbus Electronics Co.', leadTimeDays: 3, reliabilityPct: 0.9 } }),
-    prisma.supplier.create({ data: { name: 'HomeStock Distributors', leadTimeDays: 5, reliabilityPct: 0.75 } }),
-    prisma.supplier.create({ data: { name: 'Craftline Furniture Supply', leadTimeDays: 7, reliabilityPct: 0.8 } }),
-  ]);
+  // Reset SQLite AUTOINCREMENT high-water marks so a reseed restarts all ids at 1.
+  // This makes "reset & replay" produce byte-identical event messages (SC-004).
+  // sqlite_sequence exists once any AUTOINCREMENT table has been written.
+  try {
+    await prisma.$executeRawUnsafe('DELETE FROM sqlite_sequence');
+  } catch {
+    // sqlite_sequence not present yet (fresh db) — nothing to reset.
+  }
+
+  // Create sequentially (NOT Promise.all) so auto-increment ids are assigned in a
+  // fixed order — required for deterministic replay (rng picks customers by index).
+  const supplierSpecs = [
+    { name: 'Nimbus Electronics Co.', leadTimeDays: 3, reliabilityPct: 0.9 },
+    { name: 'HomeStock Distributors', leadTimeDays: 5, reliabilityPct: 0.75 },
+    { name: 'Craftline Furniture Supply', leadTimeDays: 7, reliabilityPct: 0.8 },
+  ];
+  const suppliers = [];
+  for (const s of supplierSpecs) suppliers.push(await prisma.supplier.create({ data: s }));
 
   // 6 hero SKUs. reorderPoint/onHand tuned so a few days of demand breaches it fast.
   const products = [
@@ -49,11 +62,11 @@ async function main() {
     });
   }
 
-  await Promise.all(
-    ['Downtown Store', 'Website', 'Mobile App', 'Wholesale Partner'].map((name, i) =>
-      prisma.customer.create({ data: { name, segment: i === 3 ? 'wholesale' : 'retail' } })
-    )
-  );
+  // Sequential for deterministic customer ids (see supplier note above).
+  const customerNames = ['Downtown Store', 'Website', 'Mobile App', 'Wholesale Partner'];
+  for (let i = 0; i < customerNames.length; i++) {
+    await prisma.customer.create({ data: { name: customerNames[i], segment: i === 3 ? 'wholesale' : 'retail' } });
+  }
 
   await prisma.simState.create({ data: { id: 1, currentDay: 0, rngSeed: 'enterprise360' } });
   console.log('Seed complete.');
