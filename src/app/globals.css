@@ -1,26 +1,60 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Operations Console palette */
+  --color-bg: #0c1220;
+  --color-panel: #141c2b;
+  --color-panel-2: #1b2537;
+  --color-line: #26324a;
+  --color-text: #e8edf5;
+  --color-muted: #8a98b0;
+  --color-accent: #f5a524; /* signal amber — live/active */
+  --color-positive: #34d3c0; /* petrol teal — healthy */
+  --color-alert: #f0563a; /* warm red — delays/backorders */
+  --color-info: #5b9bf3; /* cool blue — neutral series */
+
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+
+  --radius: 4px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-bg);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+/* Uppercase tracked mono label ("eyebrow") used across the console */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Hairline-bordered instrument surface */
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
