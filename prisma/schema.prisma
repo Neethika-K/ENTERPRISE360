@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite/Prisma does not support enum types. All status/type columns below are
+// String with their valid values documented inline. Do not convert to `enum`.
+
+model Supplier {
+  id             Int      @id @default(autoincrement())
+  name           String
+  leadTimeDays   Int
+  reliabilityPct Float // 0..1 chance of on-time delivery
+  createdAt      DateTime @default(now())
+  products       Product[]
+  purchaseOrders PurchaseOrder[]
+}
+
+model Product {
+  id               Int      @id @default(autoincrement())
+  sku              String   @unique
+  name             String
+  category         String
+  unitCost         Float
+  unitPrice        Float
+  reorderPoint     Int
+  reorderQuantity  Int
+  supplierId       Int
+  supplier         Supplier @relation(fields: [supplierId], references: [id])
+  createdAt        DateTime @default(now())
+  orderLines       OrderLine[]
+  inventory        Inventory?
+  purchaseRequests PurchaseRequest[]
+  poLines          PurchaseOrderLine[]
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  segment   String   @default("retail")
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  customerId  Int
+  customer    Customer @relation(fields: [customerId], references: [id])
+  simDay      Int
+  status      String   @default("placed") // placed | fulfilled | backordered | cancelled
+  totalAmount Float    @default(0)
+  createdAt   DateTime @default(now())
+  lines       OrderLine[]
+  invoices    Invoice[]
+}
+
+model OrderLine {
+  id              Int     @id @default(autoincrement())
+  orderId         Int
+  order           Order   @relation(fields: [orderId], references: [id])
+  productId       Int
+  product         Product @relation(fields: [productId], references: [id])
+  quantity        Int
+  unitPriceAtSale Float
+  lineStatus      String // fulfilled | backordered
+}
+
+model Inventory {
+  productId        Int      @id
+  product          Product  @relation(fields: [productId], references: [id])
+  quantityOnHand   Int
+  quantityIncoming Int      @default(0)
+  updatedSimDay    Int      @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+model PurchaseRequest {
+  id                Int      @id @default(autoincrement())
+  productId         Int
+  product           Product  @relation(fields: [productId], references: [id])
+  simDayCreated     Int
+  quantityRequested Int
+  status            String   @default("pending") // pending | approved | rejected | converted
+  approvedSimDay    Int?
+  approver          String?
+  purchaseOrders    PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id                    Int      @id @default(autoincrement())
+  supplierId            Int
+  supplier              Supplier @relation(fields: [supplierId], references: [id])
+  purchaseRequestId     Int?
+  purchaseRequest       PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id])
+  simDayPlaced          Int
+  expectedSimDayArrival Int
+  actualSimDayArrival   Int?
+  status                String   @default("placed") // placed | in_transit | delayed | received | cancelled
+  totalCost             Float    @default(0)
+  lines                 PurchaseOrderLine[]
+  invoices              Invoice[]
+}
+
+model PurchaseOrderLine {
+  id               Int     @id @default(autoincrement())
+  purchaseOrderId  Int
+  purchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  productId        Int
+  product          Product @relation(fields: [productId], references: [id])
+  quantityOrdered  Int
+  quantityReceived Int     @default(0)
+  unitCostAtOrder  Float
+}
+
+model Invoice {
+  id             Int      @id @default(autoincrement())
+  type           String // customer_ar | supplier_ap
+  relatedOrderId Int?
+  order          Order?   @relation(fields: [relatedOrderId], references: [id])
+  relatedPoId    Int?
+  purchaseOrder  PurchaseOrder? @relation(fields: [relatedPoId], references: [id])
+  amount         Float
+  simDayIssued   Int
+  simDayDue      Int
+  simDayPaid     Int?
+  status         String   @default("open") // open | paid | overdue
+}
+
+model SimState {
+  id         Int      @id @default(1)
+  currentDay Int      @default(0)
+  rngSeed    String   @default("enterprise360")
+  lastTickAt DateTime @default(now())
+}
+
+model SimEvent {
+  id         Int      @id @default(autoincrement())
+  simDay     Int
+  sequence   Int
+  eventType  String
+  entityType String?
+  entityId   Int?
+  message    String
+  payload    String? // JSON.stringify(...) — SQLite has no Json scalar
+  createdAt  DateTime @default(now())
+
+  @@index([simDay, sequence])
+}
+
+model KpiSnapshot {
+  id                Int   @id @default(autoincrement())
+  simDay            Int   @unique
+  revenue           Float
+  cogs              Float
+  grossMargin       Float
+  ordersCount       Int
+  backorderCount    Int
+  inventoryValue    Float
+  openPrCount       Int
+  openPoCount       Int
+  onTimeDeliveryPct Float
+  cashPosition      Float
+}
