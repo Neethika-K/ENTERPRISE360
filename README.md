@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Enterprise360 — Operations Console
 
-## Getting Started
+A digital enterprise simulation: a fictional omnichannel retail company you operate
+one simulated day at a time. Advancing the day runs a deterministic business-rule
+pipeline where a single customer order ripples across **Sales → Inventory →
+Procurement → Warehouse → Finance**, with every cause and effect written to a live
+system log and five connected dashboards. A built-in Business Analysis case study
+(BRD, FRD, user stories, process flow, and a Requirements Traceability Matrix)
+documents the flagship problem: *inventory shortage → procurement*.
 
-First, run the development server:
+Runs entirely on your machine over a local SQLite file — no cloud accounts, no
+hosted database.
+
+## Tech stack
+
+Next.js 16 (App Router, TypeScript) · Prisma 6 + SQLite · Tailwind v4 ·
+Recharts · react-markdown + Mermaid · Vitest.
+
+## Local setup
+
+Requires Node.js 20+.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env          # DATABASE_URL="file:./dev.db"
+npx prisma migrate dev        # creates prisma/dev.db and applies the schema
+npm run db:seed               # loads 6 hero SKUs, 3 suppliers, 4 customers, tuned stock
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev                   # development → http://localhost:3000
+# or production mode:
+npm run build && npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000`, press **Advance Day** (or **Fast-forward +7**), and
+watch the loop play out. **Reset** returns the company to day 0.
 
-## Learn More
+## Tests
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The simulation engine is built test-first: unit tests per rule module plus
+determinism and golden-path integration tests. Tests use an isolated `prisma/test.db`
+and run sequentially (SQLite has a single writer).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## How the simulation works
 
-## Deploy on Vercel
+Each day advances through a fixed, transactional 8-stage pipeline:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Demand** — generate customer orders (with occasional spikes)
+2. **Fulfilment** — fill from stock or backorder (whole-line)
+3. **Reorder** — raise a purchase request when on-hand + incoming < reorder point
+4. **Approval** — auto-approve under a cost threshold, else hold for review
+5. **Procurement** — place a PO against the supplier's lead time (delays possible)
+6. **Receiving** — replenish stock when a PO arrives
+7. **Finance** — record revenue and cost (instant settlement in this release)
+8. **KPI snapshot** — capture one row of company metrics for the day
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Randomness is seeded per day (`hash(seed, day)`), so the simulation is fully
+deterministic and replayable — the same starting point always produces the same
+events.
+
+## Deploying to the cloud later
+
+This release is local-first on SQLite. To host it publicly, switch the Prisma
+datasource to PostgreSQL (e.g. Neon or Supabase) and deploy to a host such as
+Vercel — the application logic is unchanged. This is intentionally out of scope
+for the current build.
+
+## Scope
+
+**In scope:** the connected inventory-to-procurement loop across Sales, Inventory,
+Procurement, Warehouse, and Finance; five dashboards; one full BA case study.
+
+**Future roadmap (not built):** additional departments (HR, Marketing, IT), more
+business problems, multi-industry variants, and predictive/ML features.

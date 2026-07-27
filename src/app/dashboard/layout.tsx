@@ -1,14 +1,6 @@
-import Link from 'next/link';
 import TickControls from '@/components/dashboard/TickControls';
+import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import { getCurrentDay } from '@/lib/kpi-selectors';
-
-const tabs = [
-  ['Executive', '/dashboard/executive'],
-  ['Sales', '/dashboard/sales'],
-  ['Inventory', '/dashboard/inventory'],
-  ['Procurement', '/dashboard/procurement'],
-  ['Finance', '/dashboard/finance'],
-] as const;
 
 export const dynamic = 'force-dynamic';
 
@@ -29,17 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Department tabs */}
       <div className="border-b border-line px-6">
-        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto">
-          {tabs.map(([label, href]) => (
-            <Link
-              key={href}
-              href={href}
-              className="border-b-2 border-transparent px-3 py-3 font-mono text-xs uppercase tracking-wider text-muted hover:text-text"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+        <DashboardTabs />
       </div>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>

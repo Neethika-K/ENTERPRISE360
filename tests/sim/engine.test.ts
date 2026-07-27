@@ -53,4 +53,25 @@ describe('runTick (integration, real DB)', () => {
     const state = await prisma.simState.findUniqueOrThrow({ where: { id: 1 } });
     expect(state.currentDay).toBe(2);
   }, 30000);
+
+  it('reset returns to day 0 with starting stock and no open transactions', async () => {
+    await reseed();
+    // Advance several days so real transactional data accumulates.
+    for (let i = 0; i < 6; i++) await runTick();
+    expect(await prisma.order.count()).toBeGreaterThan(0);
+
+    // Reset === reseed (what the resetSim server action calls).
+    await reseed();
+
+    const state = await prisma.simState.findUniqueOrThrow({ where: { id: 1 } });
+    expect(state.currentDay).toBe(0);
+    expect(await prisma.order.count()).toBe(0);
+    expect(await prisma.purchaseRequest.count()).toBe(0);
+    expect(await prisma.purchaseOrder.count()).toBe(0);
+    expect(await prisma.simEvent.count()).toBe(0);
+    // Starting stock restored (ELEC-001 seeds at 55 on hand, 0 incoming).
+    const elec = await prisma.product.findUniqueOrThrow({ where: { sku: 'ELEC-001' }, include: { inventory: true } });
+    expect(elec.inventory?.quantityOnHand).toBe(55);
+    expect(elec.inventory?.quantityIncoming).toBe(0);
+  }, 30000);
 });
