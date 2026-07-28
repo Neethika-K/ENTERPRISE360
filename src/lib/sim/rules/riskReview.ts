@@ -2,9 +2,9 @@ import { chance } from '../rng';
 import { pushEvent } from '../events';
 import type { RuleFn } from '../types';
 
-const FLAG_RATE = 0.08; // chance a new order is flagged risky
+const FLAG_RATE = 0.1; // chance a new order is flagged risky
 const CLEAR_RATE = 0.8; // of reviewed orders, share cleared (rest rejected)
-const FRAUD_RATE = 0.15; // of cleared risky orders, share that are actually fraud
+const FRAUD_RATE = 0.35; // of cleared risky orders, share that are actually fraud
 export const CHARGEBACK_LAG = 3; // days after review a fraudulent order charges back
 
 export const runRiskReview: RuleFn = async (ctx) => {
