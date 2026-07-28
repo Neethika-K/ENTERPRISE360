@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { RtmRow } from '@/content/case-study/rtm';
+import type { RtmRow } from '@/content/case-study/problems';
 
 const cols: [keyof RtmRow, string][] = [
   ['reqId', 'Req'],
