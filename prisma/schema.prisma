@@ -44,6 +44,7 @@ model Customer {
   segment   String   @default("retail")
   createdAt DateTime @default(now())
   orders    Order[]
+  supportTickets SupportTicket[]
 }
 
 model Order {
@@ -56,6 +57,7 @@ model Order {
   createdAt   DateTime @default(now())
   lines       OrderLine[]
   invoices    Invoice[]
+  supportTickets SupportTicket[]
 }
 
 model OrderLine {
@@ -103,6 +105,7 @@ model PurchaseOrder {
   totalCost             Float    @default(0)
   lines                 PurchaseOrderLine[]
   invoices              Invoice[]
+  supportTickets        SupportTicket[]
 }
 
 model PurchaseOrderLine {
@@ -128,6 +131,22 @@ model Invoice {
   simDayDue      Int
   simDayPaid     Int?
   status         String   @default("open") // open | paid | overdue
+}
+
+model SupportTicket {
+  id              Int      @id @default(autoincrement())
+  customerId      Int
+  customer        Customer @relation(fields: [customerId], references: [id])
+  orderId         Int?
+  order           Order?   @relation(fields: [orderId], references: [id])
+  purchaseOrderId Int?
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  category        String // backorder | late_delivery
+  simDayOpened    Int
+  simDayTarget    Int // opened + seeded handling days; resolve when currentDay >= this
+  simDayResolved  Int?
+  status          String   @default("open") // open | in_progress | resolved
+  csatScore       Int?
 }
 
 model SimState {
@@ -164,4 +183,8 @@ model KpiSnapshot {
   openPoCount       Int
   onTimeDeliveryPct Float
   cashPosition      Float
+  openTickets       Int   @default(0)
+  avgResolutionDays Float @default(0)
+  csat              Float @default(0)
+  nps               Int   @default(0)
 }
