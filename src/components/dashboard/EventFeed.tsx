@@ -20,6 +20,10 @@ const TONE: Record<string, string> = {
   return_restocked: 'text-positive',
   return_writeoff: 'text-alert',
   refund_issued: 'text-muted',
+  order_flagged: 'text-accent',
+  order_cleared: 'text-muted',
+  order_rejected: 'text-alert',
+  chargeback: 'text-alert',
 };
 
 export default function EventFeed({

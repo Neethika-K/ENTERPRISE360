@@ -22,7 +22,21 @@ export async function getKpiTrend() {
     openTickets: r.openTickets,
     returnRate: r.returnRate,
     refundsValue: r.refundsValue,
+    ordersHeld: r.ordersHeld,
+    chargebacksValue: r.chargebacksValue,
   }));
+}
+
+export async function getRiskSummary() {
+  const kpi = await prisma.kpiSnapshot.findFirst({ orderBy: { simDay: 'desc' } });
+  const ordersRejected = await prisma.order.count({ where: { reviewStatus: 'rejected' } });
+  const recentChargebacks = await prisma.chargeback.findMany({ orderBy: { id: 'desc' }, take: 6 });
+  return {
+    ordersHeld: kpi?.ordersHeld ?? 0,
+    ordersRejected,
+    chargebacksValue: kpi?.chargebacksValue ?? 0,
+    recentChargebacks,
+  };
 }
 
 export async function getCustomerServiceSummary() {
