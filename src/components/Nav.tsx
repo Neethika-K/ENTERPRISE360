@@ -10,6 +10,7 @@ export default function Nav() {
       <div className="flex items-center gap-6 text-sm text-muted">
         <Link href="/dashboard/executive" className="hover:text-text">Console</Link>
         <Link href="/case-study" className="hover:text-text">Case Study</Link>
+        <Link href="/delivery" className="hover:text-text">Delivery</Link>
       </div>
     </nav>
   );
