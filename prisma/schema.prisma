@@ -52,14 +52,18 @@ model Order {
   id          Int      @id @default(autoincrement())
   customerId  Int
   customer    Customer @relation(fields: [customerId], references: [id])
-  simDay      Int
-  status      String   @default("placed") // placed | fulfilled | backordered | cancelled
-  totalAmount Float    @default(0)
-  createdAt   DateTime @default(now())
-  lines       OrderLine[]
-  invoices    Invoice[]
+  simDay       Int
+  status       String   @default("placed") // placed | fulfilled | backordered | cancelled
+  totalAmount  Float    @default(0)
+  reviewStatus String   @default("none") // none | held | cleared | rejected
+  reviewSimDay Int?
+  fraudulent   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  lines        OrderLine[]
+  invoices     Invoice[]
   supportTickets SupportTicket[]
-  returns     Return[]
+  returns      Return[]
+  chargebacks  Chargeback[]
 }
 
 model OrderLine {
@@ -136,6 +140,14 @@ model Invoice {
   status         String   @default("open") // open | paid | overdue
 }
 
+model Chargeback {
+  id            Int   @id @default(autoincrement())
+  orderId       Int
+  order         Order @relation(fields: [orderId], references: [id])
+  amount        Float
+  simDayCreated Int
+}
+
 model Return {
   id            Int      @id @default(autoincrement())
   orderId       Int
@@ -206,4 +218,6 @@ model KpiSnapshot {
   nps               Int   @default(0)
   returnRate        Float @default(0)
   refundsValue      Float @default(0)
+  ordersHeld        Int   @default(0)
+  chargebacksValue  Float @default(0)
 }

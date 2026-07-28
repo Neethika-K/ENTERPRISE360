@@ -12,6 +12,7 @@ async function wipe() {
     prisma.simEvent.deleteMany(),
     prisma.supportTicket.deleteMany(),
     prisma.return.deleteMany(),
+    prisma.chargeback.deleteMany(),
     prisma.invoice.deleteMany(),
     prisma.purchaseOrderLine.deleteMany(),
     prisma.purchaseOrder.deleteMany(),

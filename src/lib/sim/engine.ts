@@ -61,6 +61,7 @@ export async function resetSimulation(seed?: string): Promise<void> {
     await tx.simEvent.deleteMany();
     await tx.supportTicket.deleteMany();
     await tx.return.deleteMany();
+    await tx.chargeback.deleteMany();
     await tx.invoice.deleteMany();
     await tx.purchaseOrderLine.deleteMany();
     await tx.purchaseOrder.deleteMany();
