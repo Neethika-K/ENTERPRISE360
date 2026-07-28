@@ -2,9 +2,10 @@ import { pushEvent } from '../events';
 import type { RuleFn } from '../types';
 
 export const runFinance: RuleFn = async (ctx) => {
-  // AR: fulfilled orders from today without an invoice
+  // AR: any fulfilled order still lacking an invoice (recognized on the day it is
+  // fulfilled — which may be later than its creation day for held-then-cleared orders).
   const orders = await ctx.tx.order.findMany({
-    where: { simDay: ctx.day, status: 'fulfilled', invoices: { none: {} } }, orderBy: { id: 'asc' },
+    where: { status: 'fulfilled', invoices: { none: {} } }, orderBy: { id: 'asc' },
   });
   for (const o of orders) {
     const inv = await ctx.tx.invoice.create({

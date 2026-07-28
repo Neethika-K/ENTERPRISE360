@@ -3,6 +3,7 @@ import type { KpiSnapshot } from '@prisma/client';
 import type { RuleFn, SimEventInput, TickContext } from './types';
 import { makeRng } from './rng';
 import { generateDemand } from './rules/demand';
+import { runRiskReview } from './rules/riskReview';
 import { fulfillOrders } from './rules/fulfillment';
 import { checkReorderPoints } from './rules/reorder';
 import { approvePurchaseRequests } from './rules/approval';
@@ -15,6 +16,7 @@ import { snapshotKpis } from './rules/kpis';
 
 const PIPELINE: RuleFn[] = [
   generateDemand,
+  runRiskReview,
   fulfillOrders,
   checkReorderPoints,
   approvePurchaseRequests,

@@ -7,8 +7,13 @@ export const snapshotKpis: RuleFn = async (ctx) => {
   const arToday = await ctx.tx.invoice.findMany({ where: { type: 'customer_ar', simDayIssued: day } });
   const revenue = arToday.reduce((s, i) => s + i.amount, 0);
 
+  // COGS recognized on the same day as revenue: fulfilled lines of the orders invoiced
+  // today (handles held-then-cleared orders fulfilled later than their creation day).
+  const invoicedOrderIds = arToday
+    .map((i) => i.relatedOrderId)
+    .filter((id): id is number => id != null);
   const fulfilledLines = await ctx.tx.orderLine.findMany({
-    where: { lineStatus: 'fulfilled', order: { simDay: day } }, include: { product: true },
+    where: { lineStatus: 'fulfilled', orderId: { in: invoicedOrderIds } }, include: { product: true },
   });
   const cogs = fulfilledLines.reduce((s, l) => s + l.quantity * l.product.unitCost, 0);
 
@@ -35,7 +40,11 @@ export const snapshotKpis: RuleFn = async (ctx) => {
     _sum: { amount: true }, where: { type: 'customer_refund', status: 'paid', simDayPaid: { lte: day } },
   });
   const refundsValue = paidRefunds._sum.amount ?? 0;
-  const cashPosition = (paidAr._sum.amount ?? 0) - (paidAp._sum.amount ?? 0) - refundsValue;
+  const chargebacksAgg = await ctx.tx.chargeback.aggregate({ _sum: { amount: true } });
+  const chargebacksValue = chargebacksAgg._sum.amount ?? 0;
+  const ordersHeld = await ctx.tx.order.count({ where: { reviewStatus: 'held' } });
+  const cashPosition =
+    (paidAr._sum.amount ?? 0) - (paidAp._sum.amount ?? 0) - refundsValue - chargebacksValue;
 
   // Returns KPI (cumulative returns ÷ cumulative fulfilled order lines).
   const totalReturns = await ctx.tx.return.count();
@@ -63,6 +72,7 @@ export const snapshotKpis: RuleFn = async (ctx) => {
     inventoryValue, openPrCount, openPoCount, onTimeDeliveryPct, cashPosition,
     openTickets, avgResolutionDays, csat, nps,
     returnRate, refundsValue,
+    ordersHeld, chargebacksValue,
   };
 
   await ctx.tx.kpiSnapshot.upsert({ where: { simDay: day }, create: { simDay: day, ...data }, update: data });
