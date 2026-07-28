@@ -92,6 +92,7 @@ body {
   padding: 0.05rem 0.3rem;
 }
 .doc a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.doc a.no-underline { text-decoration: none; color: inherit; }
 .doc table {
   width: 100%;
   border-collapse: collapse;
