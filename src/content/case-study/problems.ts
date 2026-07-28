@@ -125,6 +125,20 @@ export const problems: Problem[] = [
       { reqId: 'FR-RT-5', description: 'Return-rate and refund KPIs', userStory: 'US-RT-4', acceptanceCriteria: 'Snapshot carries returnRate + refundsValue; Sales & Finance show them', feature: 'src/lib/sim/rules/kpis.ts · /dashboard/sales · /dashboard/finance' },
     ],
   },
+  {
+    slug: 'fraud',
+    title: 'Fraudulent Orders → Risk Review',
+    blurb:
+      'A control point between order and fulfilment: risky orders are held, reviewed, and cleared or rejected — and fraud that slips through is tracked as chargebacks.',
+    docs: ['brd', 'frd', 'user-stories', 'process-flow'],
+    rtm: [
+      { reqId: 'FR-FR-1', description: 'Flag & hold risky orders', userStory: 'US-FR-1', acceptanceCriteria: 'New order flagged at a seeded rate ⇒ held', feature: 'src/lib/sim/rules/riskReview.ts · /dashboard/finance' },
+      { reqId: 'FR-FR-2', description: 'Gate fulfilment on held orders', userStory: 'US-FR-1', acceptanceCriteria: 'Held orders are not fulfilled', feature: 'src/lib/sim/rules/fulfillment.ts' },
+      { reqId: 'FR-FR-3', description: 'Review held orders (clear/reject)', userStory: 'US-FR-2', acceptanceCriteria: 'Held ⇒ cleared (fulfillable) or rejected (cancelled)', feature: 'src/lib/sim/rules/riskReview.ts' },
+      { reqId: 'FR-FR-4', description: 'Chargeback fraud that slipped through', userStory: 'US-FR-4', acceptanceCriteria: 'Fraudulent cleared+fulfilled order past lag ⇒ one chargeback, cash down', feature: 'src/lib/sim/rules/riskReview.ts · /dashboard/finance' },
+      { reqId: 'FR-FR-5', description: 'Risk KPIs + fulfilment-day accounting', userStory: 'US-FR-5', acceptanceCriteria: 'ordersHeld + chargebacksValue tracked; revenue/COGS on fulfilment day', feature: 'src/lib/sim/rules/kpis.ts · /dashboard/executive' },
+    ],
+  },
 ];
 
 export function getProblem(slug: string): Problem | undefined {
