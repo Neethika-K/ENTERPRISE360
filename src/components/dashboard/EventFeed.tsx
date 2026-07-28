@@ -16,6 +16,10 @@ const TONE: Record<string, string> = {
   kpi_snapshot: 'text-muted',
   ticket_opened: 'text-alert',
   ticket_resolved: 'text-positive',
+  return_created: 'text-info',
+  return_restocked: 'text-positive',
+  return_writeoff: 'text-alert',
+  refund_issued: 'text-muted',
 };
 
 export default function EventFeed({

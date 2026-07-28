@@ -10,10 +10,11 @@ export default async function FinancePage() {
   const [kpi, trend] = await Promise.all([getLatestKpi(), getKpiTrend()]);
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiCard title="Revenue · today" value={kpi ? money(kpi.revenue) : '—'} tone="accent" />
         <KpiCard title="COGS · today" value={kpi ? money(kpi.cogs) : '—'} />
         <KpiCard title="Gross margin · today" value={kpi ? money(kpi.grossMargin) : '—'} tone="positive" />
+        <KpiCard title="Refunds · to date" value={kpi ? money(kpi.refundsValue) : '—'} tone={kpi && kpi.refundsValue > 0 ? 'alert' : 'default'} />
       </div>
       <div className="grid gap-3 lg:grid-cols-2">
         <TrendChart title="Gross margin / day" data={trend.map((t) => ({ label: t.label, value: t.grossMargin }))} color="#34d3c0" />

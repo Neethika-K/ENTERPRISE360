@@ -20,6 +20,8 @@ export async function getKpiTrend() {
     nps: r.nps,
     csat: r.csat,
     openTickets: r.openTickets,
+    returnRate: r.returnRate,
+    refundsValue: r.refundsValue,
   }));
 }
 
@@ -89,5 +91,19 @@ export async function getSalesSummary() {
     .sort((a, b) => b.qty - a.qty)
     .slice(0, 5);
   const ordersCount = await prisma.order.count({ where: { simDay: day } });
-  return { day, ordersCount, fulfilled, backordered, topSkus };
+  const latestKpi = await prisma.kpiSnapshot.findFirst({ orderBy: { simDay: 'desc' } });
+  const recentReturns = await prisma.return.findMany({
+    include: { product: true },
+    orderBy: { id: 'desc' },
+    take: 8,
+  });
+  return {
+    day,
+    ordersCount,
+    fulfilled,
+    backordered,
+    topSkus,
+    returnRate: latestKpi?.returnRate ?? 0,
+    recentReturns,
+  };
 }
