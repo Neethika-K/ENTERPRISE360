@@ -7,6 +7,7 @@ async function main() {
   await prisma.$transaction([
     prisma.kpiSnapshot.deleteMany(),
     prisma.simEvent.deleteMany(),
+    prisma.supportTicket.deleteMany(),
     prisma.invoice.deleteMany(),
     prisma.purchaseOrderLine.deleteMany(),
     prisma.purchaseOrder.deleteMany(),

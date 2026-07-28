@@ -9,6 +9,7 @@ import { approvePurchaseRequests } from './rules/approval';
 import { placePurchaseOrders } from './rules/procurement';
 import { receivePurchaseOrders } from './rules/receiving';
 import { runFinance } from './rules/finance';
+import { runCustomerService } from './rules/customerService';
 import { snapshotKpis } from './rules/kpis';
 
 const PIPELINE: RuleFn[] = [
@@ -19,6 +20,7 @@ const PIPELINE: RuleFn[] = [
   placePurchaseOrders,
   receivePurchaseOrders,
   runFinance,
+  runCustomerService,
   snapshotKpis,
 ];
 
@@ -55,6 +57,7 @@ export async function resetSimulation(seed?: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
     await tx.kpiSnapshot.deleteMany();
     await tx.simEvent.deleteMany();
+    await tx.supportTicket.deleteMany();
     await tx.invoice.deleteMany();
     await tx.purchaseOrderLine.deleteMany();
     await tx.purchaseOrder.deleteMany();

@@ -33,9 +33,26 @@ export const snapshotKpis: RuleFn = async (ctx) => {
   });
   const cashPosition = (paidAr._sum.amount ?? 0) - (paidAp._sum.amount ?? 0);
 
+  // Customer Service KPIs (cumulative over resolved tickets).
+  const openTickets = await ctx.tx.supportTicket.count({
+    where: { status: { in: ['open', 'in_progress'] } },
+  });
+  const resolved = await ctx.tx.supportTicket.findMany({
+    where: { status: 'resolved', csatScore: { not: null } },
+  });
+  const resolvedCount = resolved.length;
+  const avgResolutionDays = resolvedCount
+    ? resolved.reduce((s, t) => s + ((t.simDayResolved ?? t.simDayOpened) - t.simDayOpened), 0) / resolvedCount
+    : 0;
+  const csat = resolvedCount ? resolved.reduce((s, t) => s + (t.csatScore ?? 0), 0) / resolvedCount : 0;
+  const promoters = resolved.filter((t) => (t.csatScore ?? 0) >= 4).length;
+  const detractors = resolved.filter((t) => (t.csatScore ?? 0) <= 2).length;
+  const nps = resolvedCount ? Math.round(((promoters - detractors) / resolvedCount) * 100) : 0;
+
   const data = {
     revenue, cogs, grossMargin: revenue - cogs, ordersCount, backorderCount,
     inventoryValue, openPrCount, openPoCount, onTimeDeliveryPct, cashPosition,
+    openTickets, avgResolutionDays, csat, nps,
   };
 
   await ctx.tx.kpiSnapshot.upsert({ where: { simDay: day }, create: { simDay: day, ...data }, update: data });

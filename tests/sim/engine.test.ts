@@ -44,6 +44,8 @@ describe('runTick (integration, real DB)', () => {
     expect(seen.has('po_placed')).toBe(true);
     expect(seen.has('po_received')).toBe(true);
     expect(seen.has('inventory_replenished')).toBe(true);
+    expect(seen.has('ticket_opened')).toBe(true);
+    expect(seen.has('ticket_resolved')).toBe(true);
   }, 60000);
 
   it('advances SimState.currentDay by one per tick', async () => {
