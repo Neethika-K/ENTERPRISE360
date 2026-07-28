@@ -111,6 +111,20 @@ export const problems: Problem[] = [
       { reqId: 'FR-CS-6', description: 'Customer Service dashboard + Exec NPS', userStory: 'US-CS-5', acceptanceCriteria: 'CS view shows NPS/CSAT/tickets; Executive shows NPS tile', feature: '/dashboard/customer-service · /dashboard/executive' },
     ],
   },
+  {
+    slug: 'returns',
+    title: 'Product Returns → Reverse Logistics',
+    blurb:
+      'A sale is not always final. Returns restock or write off inventory and refund the customer — turning silent margin leakage into a tracked, traceable number.',
+    docs: ['brd', 'frd', 'user-stories', 'process-flow'],
+    rtm: [
+      { reqId: 'FR-RT-1', description: 'Generate returns from recent fulfilled sales', userStory: 'US-RT-1', acceptanceCriteria: 'Line fulfilled RETURN_LAG days ago may return at a seeded rate', feature: 'src/lib/sim/rules/returns.ts · /dashboard/sales' },
+      { reqId: 'FR-RT-2', description: 'Restock resolution adds stock back', userStory: 'US-RT-2', acceptanceCriteria: 'Restock ⇒ on-hand increases by returned qty', feature: 'src/lib/sim/rules/returns.ts · /dashboard/inventory' },
+      { reqId: 'FR-RT-3', description: 'Write-off resolution loses value', userStory: 'US-RT-2', acceptanceCriteria: 'Write-off ⇒ inventory unchanged', feature: 'src/lib/sim/rules/returns.ts' },
+      { reqId: 'FR-RT-4', description: 'Refund the customer (cash out)', userStory: 'US-RT-3', acceptanceCriteria: 'Any return ⇒ paid customer_refund invoice; cash reduced', feature: 'src/lib/sim/rules/returns.ts · /dashboard/finance' },
+      { reqId: 'FR-RT-5', description: 'Return-rate and refund KPIs', userStory: 'US-RT-4', acceptanceCriteria: 'Snapshot carries returnRate + refundsValue; Sales & Finance show them', feature: 'src/lib/sim/rules/kpis.ts · /dashboard/sales · /dashboard/finance' },
+    ],
+  },
 ];
 
 export function getProblem(slug: string): Problem | undefined {
