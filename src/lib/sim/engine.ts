@@ -58,6 +58,7 @@ export async function resetSimulation(seed?: string): Promise<void> {
     await tx.kpiSnapshot.deleteMany();
     await tx.simEvent.deleteMany();
     await tx.supportTicket.deleteMany();
+    await tx.return.deleteMany();
     await tx.invoice.deleteMany();
     await tx.purchaseOrderLine.deleteMany();
     await tx.purchaseOrder.deleteMany();

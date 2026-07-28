@@ -36,6 +36,7 @@ model Product {
   inventory        Inventory?
   purchaseRequests PurchaseRequest[]
   poLines          PurchaseOrderLine[]
+  returns          Return[]
 }
 
 model Customer {
@@ -58,6 +59,7 @@ model Order {
   lines       OrderLine[]
   invoices    Invoice[]
   supportTickets SupportTicket[]
+  returns     Return[]
 }
 
 model OrderLine {
@@ -69,6 +71,7 @@ model OrderLine {
   quantity        Int
   unitPriceAtSale Float
   lineStatus      String // fulfilled | backordered
+  returns         Return[]
 }
 
 model Inventory {
@@ -133,6 +136,20 @@ model Invoice {
   status         String   @default("open") // open | paid | overdue
 }
 
+model Return {
+  id            Int      @id @default(autoincrement())
+  orderId       Int
+  order         Order    @relation(fields: [orderId], references: [id])
+  orderLineId   Int?
+  orderLine     OrderLine? @relation(fields: [orderLineId], references: [id])
+  productId     Int
+  product       Product  @relation(fields: [productId], references: [id])
+  quantity      Int
+  simDayCreated Int
+  resolution    String // restock | writeoff
+  refundAmount  Float
+}
+
 model SupportTicket {
   id              Int      @id @default(autoincrement())
   customerId      Int
@@ -187,4 +204,6 @@ model KpiSnapshot {
   avgResolutionDays Float @default(0)
   csat              Float @default(0)
   nps               Int   @default(0)
+  returnRate        Float @default(0)
+  refundsValue      Float @default(0)
 }
