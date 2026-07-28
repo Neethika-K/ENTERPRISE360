@@ -3,7 +3,7 @@ import type { RuleFn } from '../types';
 
 export const fulfillOrders: RuleFn = async (ctx) => {
   const orders = await ctx.tx.order.findMany({
-    where: { status: 'placed' }, include: { lines: true }, orderBy: { id: 'asc' },
+    where: { status: 'placed', reviewStatus: { not: 'held' } }, include: { lines: true }, orderBy: { id: 'asc' },
   });
   for (const order of orders) {
     let anyBackorder = false;
