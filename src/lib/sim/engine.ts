@@ -10,6 +10,7 @@ import { placePurchaseOrders } from './rules/procurement';
 import { receivePurchaseOrders } from './rules/receiving';
 import { runFinance } from './rules/finance';
 import { runCustomerService } from './rules/customerService';
+import { runReturns } from './rules/returns';
 import { snapshotKpis } from './rules/kpis';
 
 const PIPELINE: RuleFn[] = [
@@ -21,6 +22,7 @@ const PIPELINE: RuleFn[] = [
   receivePurchaseOrders,
   runFinance,
   runCustomerService,
+  runReturns,
   snapshotKpis,
 ];
 

@@ -31,7 +31,16 @@ export const snapshotKpis: RuleFn = async (ctx) => {
   const paidAp = await ctx.tx.invoice.aggregate({
     _sum: { amount: true }, where: { type: 'supplier_ap', status: 'paid', simDayPaid: { lte: day } },
   });
-  const cashPosition = (paidAr._sum.amount ?? 0) - (paidAp._sum.amount ?? 0);
+  const paidRefunds = await ctx.tx.invoice.aggregate({
+    _sum: { amount: true }, where: { type: 'customer_refund', status: 'paid', simDayPaid: { lte: day } },
+  });
+  const refundsValue = paidRefunds._sum.amount ?? 0;
+  const cashPosition = (paidAr._sum.amount ?? 0) - (paidAp._sum.amount ?? 0) - refundsValue;
+
+  // Returns KPI (cumulative returns ÷ cumulative fulfilled order lines).
+  const totalReturns = await ctx.tx.return.count();
+  const totalFulfilledLines = await ctx.tx.orderLine.count({ where: { lineStatus: 'fulfilled' } });
+  const returnRate = totalFulfilledLines ? totalReturns / totalFulfilledLines : 0;
 
   // Customer Service KPIs (cumulative over resolved tickets).
   const openTickets = await ctx.tx.supportTicket.count({
@@ -53,6 +62,7 @@ export const snapshotKpis: RuleFn = async (ctx) => {
     revenue, cogs, grossMargin: revenue - cogs, ordersCount, backorderCount,
     inventoryValue, openPrCount, openPoCount, onTimeDeliveryPct, cashPosition,
     openTickets, avgResolutionDays, csat, nps,
+    returnRate, refundsValue,
   };
 
   await ctx.tx.kpiSnapshot.upsert({ where: { simDay: day }, create: { simDay: day, ...data }, update: data });
