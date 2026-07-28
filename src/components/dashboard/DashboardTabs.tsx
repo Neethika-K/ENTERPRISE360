@@ -8,6 +8,7 @@ const tabs = [
   ['Sales', '/dashboard/sales'],
   ['Inventory', '/dashboard/inventory'],
   ['Procurement', '/dashboard/procurement'],
+  ['Customer Service', '/dashboard/customer-service'],
   ['Finance', '/dashboard/finance'],
 ] as const;
 

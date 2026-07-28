@@ -14,6 +14,8 @@ const TONE: Record<string, string> = {
   invoice_issued: 'text-muted',
   invoice_paid: 'text-muted',
   kpi_snapshot: 'text-muted',
+  ticket_opened: 'text-alert',
+  ticket_resolved: 'text-positive',
 };
 
 export default function EventFeed({
