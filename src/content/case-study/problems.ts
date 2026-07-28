@@ -96,6 +96,21 @@ export const problems: Problem[] = [
       },
     ],
   },
+  {
+    slug: 'customer-service',
+    title: 'Supplier Delay → Customer Service → NPS',
+    blurb:
+      'When a supplier misses or stock runs out, the customer feels it. Tickets, CSAT, and NPS make that ripple visible — and traceable back to the upstream cause.',
+    docs: ['brd', 'frd', 'user-stories', 'process-flow'],
+    rtm: [
+      { reqId: 'FR-CS-1', description: 'Open a ticket for a backordered order', userStory: 'US-CS-1', acceptanceCriteria: 'Order backordered today ⇒ open backorder ticket', feature: 'src/lib/sim/rules/customerService.ts · /dashboard/customer-service' },
+      { reqId: 'FR-CS-2', description: 'Open a ticket for a late delivery', userStory: 'US-CS-1', acceptanceCriteria: 'PO received after its ETA ⇒ open late_delivery ticket', feature: 'src/lib/sim/rules/customerService.ts · /dashboard/customer-service' },
+      { reqId: 'FR-CS-3', description: 'Resolve tickets after handling time', userStory: 'US-CS-2', acceptanceCriteria: 'currentDay ≥ target ⇒ resolved with resolution day', feature: 'src/lib/sim/rules/customerService.ts' },
+      { reqId: 'FR-CS-4', description: 'Score CSAT (biased by wait/category)', userStory: 'US-CS-3', acceptanceCriteria: 'Resolved ticket gets CSAT 1–5, lower for long waits/backorders', feature: 'src/lib/sim/rules/customerService.ts' },
+      { reqId: 'FR-CS-5', description: 'Compute NPS / CSAT / backlog KPIs', userStory: 'US-CS-4', acceptanceCriteria: 'Daily snapshot carries nps, csat, openTickets, avgResolutionDays', feature: 'src/lib/sim/rules/kpis.ts · /dashboard/executive' },
+      { reqId: 'FR-CS-6', description: 'Customer Service dashboard + Exec NPS', userStory: 'US-CS-5', acceptanceCriteria: 'CS view shows NPS/CSAT/tickets; Executive shows NPS tile', feature: '/dashboard/customer-service · /dashboard/executive' },
+    ],
+  },
 ];
 
 export function getProblem(slug: string): Problem | undefined {
