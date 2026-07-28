@@ -17,7 +17,27 @@ export async function getKpiTrend() {
     onTimeDeliveryPct: r.onTimeDeliveryPct,
     openPoCount: r.openPoCount,
     openPrCount: r.openPrCount,
+    nps: r.nps,
+    csat: r.csat,
+    openTickets: r.openTickets,
   }));
+}
+
+export async function getCustomerServiceSummary() {
+  const kpi = await prisma.kpiSnapshot.findFirst({ orderBy: { simDay: 'desc' } });
+  const openTickets = await prisma.supportTicket.findMany({
+    where: { status: { in: ['open', 'in_progress'] } },
+    include: { customer: true },
+    orderBy: { id: 'desc' },
+    take: 12,
+  });
+  return {
+    nps: kpi?.nps ?? 0,
+    csat: kpi?.csat ?? 0,
+    openTicketCount: kpi?.openTickets ?? 0,
+    avgResolutionDays: kpi?.avgResolutionDays ?? 0,
+    openTickets,
+  };
 }
 
 export async function getLatestKpi() {
